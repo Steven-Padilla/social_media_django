@@ -18,8 +18,12 @@ class Profile(models.Model):
     
 
 class Post (models.Model):
+    author=models.ForeignKey( Profile, on_delete=models.CASCADE)
     image= models.ImageField(default='post.jpg', upload_to='images/posts')
     description=models.TextField(max_length=300)
+
+    def __str__(self) -> str:
+        return self.description
 
 
 
