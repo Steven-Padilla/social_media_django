@@ -11,5 +11,6 @@ router.register(r'post', views.PostView, 'post')
 urlpatterns=[
     path('/postmongo', views.CustomPostView.as_view()),
     path('/reqsmongo', views.CustomRequestView.as_view()),
+    path('/home_posts', views.FriendsView.as_view()),
     path("/", include(router.urls))
 ]
