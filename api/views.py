@@ -14,6 +14,9 @@ class PostView(viewsets.ModelViewSet):
     serializer_class=postSerializer
     queryset=Post.objects.all()
 
+
+
+# ==============> MONGO views <=======================
 class CustomPostView(views.APIView):
     def get(self,request):
         db=client['socialmedia']
@@ -25,7 +28,54 @@ class CustomPostView(views.APIView):
     
     def post (self, request):
         body=request.data
-
-        print(body)
-        return Response(status=200, data=body)
+        # TODO: Handle errors from request data 
+        db=client['socialmedia']
+        collection=db['user_posts']
+        try:
+            response=collection.insert_one(body)
+        except Exception as error:
+            return Response(status=500, data={'success':False, 'message':error, 'response':response})
+            
+        return Response(status=201, data=response)
         
+class CustomRequestView(views.APIView):
+    def get (self,request):
+        db=client['socialmedia']
+        collection=db['user_requests']
+        dataList=list(collection.find())
+        parsedData=json.loads(json_util.dumps(dataList))
+        return Response(status=200, data={'data':parsedData})
+
+    def post (self,request):
+        body=request.data
+        print('================================')
+        # TODO: Handle errors from request data 
+        db=client['socialmedia']
+        collection=db['user_requests']
+
+        try:
+            user=collection.find_one({'user':body['user']})
+            userData= json.loads(json_util.dumps(user))
+            if user:
+                reqfrom=userData['reqFrom']
+                reqTo=userData['sentTo']
+                try:
+                    if body['reqFrom']:
+                        reqfrom.append(body['reqFrom'])
+                except Exception as e:
+                    print(e)
+                try:
+                    if body['sentTo']:
+                        reqTo.append(body['sentTo'])
+                except Exception as e:
+                    print(e)
+                
+                print('Body ok')
+                updated_data={'reqFrom':reqfrom, 'sentTo':reqTo}
+                collection.update_one({'user':body['user']},{'$set':updated_data})
+
+        except Exception as error:
+            print('Errrrrooooooor')
+            return Response(status=500, data={'success':False, 'message':error})
+            
+        return Response(status=201, data={'message':'Actualizado correctamente'})
