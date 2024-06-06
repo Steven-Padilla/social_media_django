@@ -23,7 +23,6 @@ class CustomPostView(views.APIView):
         collection=db['user_posts']
         dataList=list(collection.find())
         parsedData=json.loads(json_util.dumps(dataList))
-        print(parsedData)
         return Response(status=200, data={'data':parsedData})
     
     def post (self, request):
@@ -48,7 +47,6 @@ class CustomRequestView(views.APIView):
 
     def post (self,request):
         body=request.data
-        print('================================')
         # TODO: Handle errors from request data 
         db=client['socialmedia']
         collection=db['user_requests']
@@ -70,12 +68,10 @@ class CustomRequestView(views.APIView):
                 except Exception as e:
                     print(e)
                 
-                print('Body ok')
                 updated_data={'reqFrom':reqfrom, 'sentTo':reqTo}
                 collection.update_one({'user':body['user']},{'$set':updated_data})
 
         except Exception as error:
-            print('Errrrrooooooor')
             return Response(status=500, data={'success':False, 'message':error})
             
         return Response(status=201, data={'message':'Actualizado correctamente'})
